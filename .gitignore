@@ -27,3 +27,9 @@ rustc-ice-*.txt
 # Added by cargo
 
 /target
+
+# Environment (bundled at compile time; contains allowed proxy endpoints)
+.env
+
+# Detached binary signatures (per-build, not source)
+*.sig
