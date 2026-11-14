@@ -33,3 +33,6 @@ rustc-ice-*.txt
 
 # Detached binary signatures (per-build, not source)
 *.sig
+
+# Signing secrets
+secrets/

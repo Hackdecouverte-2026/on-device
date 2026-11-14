@@ -84,7 +84,11 @@ fn parse_endpoint(raw: &str) -> Option<ProxyEndpoint> {
     if !(scheme.eq_ignore_ascii_case("http") || scheme.eq_ignore_ascii_case("https")) {
         return None;
     }
-    let default_port = if scheme.eq_ignore_ascii_case("https") { 443 } else { 80 };
+    let default_port = if scheme.eq_ignore_ascii_case("https") {
+        443
+    } else {
+        80
+    };
     let host_port = rest.split(['/', '?', '#']).next()?;
     let (host, port) = match host_port.rsplit_once(':') {
         Some((host, port)) => (host, port.parse().ok()?),
@@ -104,9 +108,7 @@ fn parse_endpoint(raw: &str) -> Option<ProxyEndpoint> {
 fn match_allowed(current: &Sysproxy, allowed: &[ProxyEndpoint]) -> Option<ProxyEndpoint> {
     allowed
         .iter()
-        .find(|ep| {
-            ep.host == current.host.to_ascii_lowercase() && ep.port == current.port
-        })
+        .find(|ep| ep.host == current.host.to_ascii_lowercase() && ep.port == current.port)
         .cloned()
 }
 
@@ -198,9 +200,9 @@ fn is_uuid(s: &str) -> bool {
         && bytes[13] == b'-'
         && bytes[18] == b'-'
         && bytes[23] == b'-'
-        && bytes.iter().all(|&b| {
-            !(b != b'-' && !b.is_ascii_hexdigit())
-        })
+        && bytes
+            .iter()
+            .all(|&b| !(b != b'-' && !b.is_ascii_hexdigit()))
 }
 
 // ---------------------------------------------------------------------------
@@ -222,9 +224,15 @@ async fn fetch_proxy_token(
 ) -> Result<String, String> {
     // Never route /auth through a system proxy: it is served by the proxy itself,
     // and the system proxy may not be authenticated yet.
-    let client = reqwest::Client::builder().no_proxy().build()
+    let client = reqwest::Client::builder()
+        .no_proxy()
+        .build()
         .map_err(|e| format!("failed to build HTTP client: {e}"))?;
-    let url = format!("{}{}", endpoint.base.trim_end_matches('/'), obfstr!("/auth"));
+    let url = format!(
+        "{}{}",
+        endpoint.base.trim_end_matches('/'),
+        obfstr!("/auth")
+    );
     let mut body = serde_json::Map::new();
     body.insert(
         obfstr!("entra_id").to_string(),
@@ -416,7 +424,10 @@ mod tests {
     #[test]
     fn defaults_port_by_scheme() {
         assert_eq!(parse_endpoint("http://proxy.example.com").unwrap().port, 80);
-        assert_eq!(parse_endpoint("https://proxy.example.com").unwrap().port, 443);
+        assert_eq!(
+            parse_endpoint("https://proxy.example.com").unwrap().port,
+            443
+        );
     }
 
     #[test]
@@ -429,7 +440,10 @@ mod tests {
             bypass: String::new(),
         };
         assert!(match_allowed(&current, &allowed).is_some());
-        let other = Sysproxy { port: 9999, ..current };
+        let other = Sysproxy {
+            port: 9999,
+            ..current
+        };
         assert!(match_allowed(&other, &allowed).is_none());
     }
 

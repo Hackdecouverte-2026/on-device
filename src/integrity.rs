@@ -20,8 +20,8 @@ pub const SIGNATURE_SUFFIX: &str = ".sig";
 /// 32-byte `public_key`.
 pub fn verify_bytes(public_key_hex: &str, data: &[u8], signature_hex: &str) -> Result<(), String> {
     let public_key = decode_fixed::<32>(public_key_hex.trim(), "public key")?;
-    let verifying_key = VerifyingKey::from_bytes(&public_key)
-        .map_err(|e| format!("invalid public key: {e}"))?;
+    let verifying_key =
+        VerifyingKey::from_bytes(&public_key).map_err(|e| format!("invalid public key: {e}"))?;
 
     let signature_bytes = decode_fixed::<64>(signature_hex.trim(), "signature")?;
     let signature = Signature::from_bytes(&signature_bytes);
@@ -33,8 +33,8 @@ pub fn verify_bytes(public_key_hex: &str, data: &[u8], signature_hex: &str) -> R
 
 /// Verify a binary against its detached `<binary>.sig` file.
 pub fn verify_file(public_key_hex: &str, binary: &Path) -> Result<(), String> {
-    let data = std::fs::read(binary)
-        .map_err(|e| format!("cannot read {}: {e}", binary.display()))?;
+    let data =
+        std::fs::read(binary).map_err(|e| format!("cannot read {}: {e}", binary.display()))?;
     let sig_path = format!("{}{}", binary.display(), SIGNATURE_SUFFIX);
     let signature_hex = std::fs::read_to_string(&sig_path).map_err(|_| {
         format!(
@@ -103,7 +103,11 @@ mod tests {
         let (signing_key, _) = keypair();
         let data = b"payload";
         let signature_hex = hex::encode(signing_key.sign(data).to_bytes());
-        let other_public = hex::encode(SigningKey::from_bytes(&[9u8; 32]).verifying_key().to_bytes());
+        let other_public = hex::encode(
+            SigningKey::from_bytes(&[9u8; 32])
+                .verifying_key()
+                .to_bytes(),
+        );
         assert!(verify_bytes(&other_public, data, &signature_hex).is_err());
     }
 
